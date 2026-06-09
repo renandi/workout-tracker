@@ -1,4 +1,4 @@
-import type { Workout, Exercise } from '../types/workout';
+import type { Workout } from '../types/workout';
 
 export const DEFAULT_REST = 60; // segundos
 

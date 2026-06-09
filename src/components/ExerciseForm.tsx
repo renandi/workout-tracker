@@ -1,4 +1,4 @@
-import { DEFAULT_REST } from '../utils/workout';
+
 import type { Exercise } from '../types/workout';
 
 interface ExerciseFormProps {
@@ -103,25 +103,28 @@ export function ExerciseForm({ exercise, index, onChange, onRemove }: ExerciseFo
 }
 
 function LabeledInput({
-  label, value, onChange, ...rest
+  label,
+  value,
+  onChange,
+  ...rest
 }: {
   label: string;
   value: number | string;
-  onChange: (v: string) => void;
-} & React.InputHTMLAttributes<HTMLInputElement>) {
+  onChange: (v: string) => void; // ← recebe string
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'>) {
+  // Omit é necessário pra evitar conflito com o onChange nativo do input
   return (
     <div className="flex flex-col gap-1 flex-1">
       <label className="text-xs text-gray-400 dark:text-gray-500">{label}</label>
       <input
         {...rest}
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)} // ← extrai o valor aqui
         className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-300 dark:placeholder:text-gray-600"
       />
     </div>
   );
 }
-
 function TrashIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
