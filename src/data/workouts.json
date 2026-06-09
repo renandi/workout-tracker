@@ -1,0 +1,392 @@
+[
+  {
+    "id": 0,
+    "order": 1,
+    "letter": "A",
+    "muscle_group": "legs",
+    "exercises": [
+      {
+        "exercise_id": 0,
+        "name": "AGACHAMENTO LIVRE",
+        "type": "reps",
+        "sets": 3,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": "1+3 x AQ+6-9"
+      },
+      {
+        "exercise_id": 1,
+        "name": "LEG PRESS",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": "REST PAUSE"
+      },
+      {
+        "exercise_id": 2,
+        "name": "CADEIRA EXTENSORA",
+        "type": "reps",
+        "sets": 3,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": "3-A"
+      },
+      {
+        "exercise_id": 3,
+        "name": "FLEXÃO NORDICA",
+        "type": "reps",
+        "sets": 3,
+        "reps": "X",
+        "rest": null,
+        "load": null,
+        "details": "3-A"
+      },
+      {
+        "exercise_id": 4,
+        "name": "CADEIRA ADUTORA",
+        "type": "reps",
+        "sets": 3,
+        "reps": "8-10",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 5,
+        "name": "PASSADA C/ HALTER",
+        "type": "reps",
+        "sets": 3,
+        "reps": "16-20",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 6,
+        "name": "PANTURRILHA SENTADO",
+        "type": "reps",
+        "sets": 5,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "order": 2,
+    "letter": "B",
+    "muscle_group": "chest_and_triceps",
+    "exercises": [
+      {
+        "exercise_id": 0,
+        "name": "SUPINO RETO BARRA",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": "1+4 x AQ+6-9"
+      },
+      {
+        "exercise_id": 1,
+        "name": "SUPINO INCLINADO BARRA",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 2,
+        "name": "CROSS OVER",
+        "type": "reps",
+        "sets": 3,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": "3-A"
+      },
+      {
+        "exercise_id": 3,
+        "name": "CROSS OVER COM FLEXÃO DE COTOVELO",
+        "type": "reps",
+        "sets": 3,
+        "reps": "8-10X",
+        "rest": null,
+        "load": null,
+        "details": "3-A"
+      },
+      {
+        "exercise_id": 4,
+        "name": "APOIO NO SOLO",
+        "type": "reps",
+        "sets": 2,
+        "reps": "X",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 5,
+        "name": "TRICEPS FRANCÊS",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 6,
+        "name": "TRICEPS TESTA BARRA W",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 7,
+        "name": "TRICEPS CORDA",
+        "type": "reps",
+        "sets": 3,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": "DROP"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "order": 3,
+    "letter": "C",
+    "muscle_group": "back_and_biceps",
+    "exercises": [
+      {
+        "exercise_id": 0,
+        "name": "BARRA FIXA NEUTRA",
+        "type": "reps",
+        "sets": 3,
+        "reps": "X",
+        "rest": null,
+        "load": null,
+        "details": "1+3 x AQ+X"
+      },
+      {
+        "exercise_id": 1,
+        "name": "REMADA BAIXA",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 2,
+        "name": "PUXADA FRENTE",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 3,
+        "name": "PUXADA ALTA COM CORDA",
+        "type": "reps",
+        "sets": 3,
+        "reps": "6-9X",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 4,
+        "name": "ROSCA 21",
+        "type": "reps",
+        "sets": 3,
+        "reps": "21",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 5,
+        "name": "BICEPS MÁQUINA",
+        "type": "reps",
+        "sets": 3,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 6,
+        "name": "ROSCA MARTELO",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "order": 4,
+    "letter": "D",
+    "muscle_group": "legs",
+    "exercises": [
+      {
+        "exercise_id": 0,
+        "name": "CADEIRA FLEXORA",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": "1+4 x AQ+6-9"
+      },
+      {
+        "exercise_id": 1,
+        "name": "AGACHAMENTO SUMO COM STEP",
+        "type": "reps",
+        "sets": 3,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 2,
+        "name": "STIFF",
+        "type": "reps",
+        "sets": 3,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 3,
+        "name": "FLEXOR DEITADO",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 4,
+        "name": "PANTURRILHA NO LEG",
+        "type": "reps",
+        "sets": 5,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 5,
+        "name": "ABDOMINAL PRANCHA ISOMÉTRICA",
+        "type": "tempo",
+        "sets": 3,
+        "reps": "60",
+        "rest": null,
+        "load": null,
+        "details": "1min"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "order": 5,
+    "letter": "E",
+    "muscle_group": "shoulders_and_traps",
+    "exercises": [
+      {
+        "exercise_id": 0,
+        "name": "DESENVOLVIMENTO MAQUINA",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": "1+4 x AQ+6-9"
+      },
+      {
+        "exercise_id": 1,
+        "name": "ELEVAÇÃO FRONTAL COM ANILHA",
+        "type": "reps",
+        "sets": 3,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 2,
+        "name": "CRUCIFIXO INVERSO (PECK DECK)",
+        "type": "reps",
+        "sets": 3,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 3,
+        "name": "ELEVAÇÃO LATERAL NO CROSS",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 4,
+        "name": "REMADA COM CORDA",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 5,
+        "name": "ENCOLHIMENTO DE OMBRO NA GUIA (FRENTE)",
+        "type": "reps",
+        "sets": 4,
+        "reps": "6-9",
+        "rest": null,
+        "load": null,
+        "details": ""
+      },
+      {
+        "exercise_id": 6,
+        "name": "ABDOMINAL MILITAR",
+        "type": "reps",
+        "sets": 3,
+        "reps": "15-20",
+        "rest": null,
+        "load": null,
+        "details": ""
+      }
+    ]
+  }
+]
