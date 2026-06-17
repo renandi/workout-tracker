@@ -110,6 +110,7 @@ export function WorkoutCard({ workout, totalSeconds, onEdit, onDelete }: Workout
                 )}
               </div>
               <div className="flex gap-3 flex-wrap">
+                <ExercisePill label="Grupo" value={ex.muscleGroup} />
                 <ExercisePill label="Sets" value={String(ex.sets)} />
                 <ExercisePill
                   label={ex.type === 'tempo' ? 'Tempo' : 'Reps'}

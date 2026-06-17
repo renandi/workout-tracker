@@ -1,4 +1,4 @@
-import type { Workout } from '../types/workout';
+import type { Exercise, MuscleGroup, Workout } from '../types/workout';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '/api';
 
@@ -6,6 +6,10 @@ export interface LibraryWorkout extends Workout {
   author?: string;
   description?: string;
   likes?: number;
+}
+
+export interface LibraryExercise extends Exercise {
+  description?: string;
 }
 
 export interface Routine {
@@ -26,26 +30,22 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  // Biblioteca de treinos
-  getWorkouts: () =>
-    request<LibraryWorkout[]>('/workouts'),
-
-  getWorkout: (id: string) =>
-    request<LibraryWorkout>(`/workouts/${id}`),
-
+  getWorkouts: () => request<LibraryWorkout[]>('/workouts'),
+  getWorkout: (id: string) => request<LibraryWorkout>(`/workouts/${id}`),
   createWorkout: (workout: Omit<LibraryWorkout, 'id'>) =>
-    request<LibraryWorkout>('/workouts', {
-      method: 'POST',
-      body: JSON.stringify(workout),
-    }),
+    request<LibraryWorkout>('/workouts', { method: 'POST', body: JSON.stringify(workout) }),
 
-  // Rotinas
-  getRoutines: () =>
-    request<Routine[]>('/routines'),
+  getExercises: () => request<LibraryExercise[]>('/exercises'),
 
+  getRoutines: () => request<Routine[]>('/routines'),
   createRoutine: (routine: Omit<Routine, 'id'>) =>
-    request<Routine>('/routines', {
-      method: 'POST',
-      body: JSON.stringify(routine),
-    }),
+    request<Routine>('/routines', { method: 'POST', body: JSON.stringify(routine) }),
 };
+
+export function filterByMuscleGroup<T extends { muscleGroup?: MuscleGroup }>(
+  items: T[],
+  group: MuscleGroup | 'Todos'
+): T[] {
+  if (group === 'Todos') return items;
+  return items.filter(i => i.muscleGroup === group);
+}

@@ -11,6 +11,7 @@ function makeExercise(): Exercise {
     id: generateId(),
     name: '',
     type: 'reps',
+    muscleGroup: 'Corpo todo',
     sets: 3,
     reps: '8-12',
     rest: DEFAULT_REST,
