@@ -50,8 +50,8 @@ export function importWorkoutsFromJson(
   raw: Array<{
     id: number; order: number; letter: string; muscle_group: string;
     exercises: Array<{
-      exercise_id: number; name: string; type: string; sets: number;
-      reps: string; rest: number | null; load: number | null; details: string;
+      exercise_id: number; name: string; type: string; target_muscle: string;
+      sets: number; reps: string; rest: number | null; load: number | null; details: string;
     }>;
   }>
 ): Workout[] {
@@ -65,7 +65,7 @@ export function importWorkoutsFromJson(
       id: generateId(),
       name: ex.name,
       type: ex.type === 'tempo' ? 'tempo' as const : 'reps' as const,
-      muscleGroup: guessMuscleGroup(w.muscle_group),
+      muscleGroup: ex.target_muscle as import('../types/workout').MuscleGroup, // ← vem direto do JSON agora
       sets: ex.sets,
       reps: ex.reps ?? 'X',
       rest: ex.rest ?? DEFAULT_REST,
@@ -73,12 +73,4 @@ export function importWorkoutsFromJson(
       details: ex.details || undefined,
     })),
   }));
-}
-
-function guessMuscleGroup(group: string): import('../types/workout').MuscleGroup {
-  if (group.includes('legs')) return 'Perna';
-  if (group.includes('chest')) return 'Peito';
-  if (group.includes('back')) return 'Costas';
-  if (group.includes('shoulders')) return 'Ombro';
-  return 'Corpo todo';
 }

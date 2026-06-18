@@ -1,3 +1,4 @@
+import { MuscleGroupBadge } from './MuscleGroupBadge';
 import { formatTime } from '../utils/workout';
 import type { LibraryExercise } from '../services/api';
 
@@ -18,9 +19,12 @@ export function ExerciseLibraryCard({ exercise, selected, onToggle }: ExerciseLi
       }`}
     >
       <div>
-        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{exercise.name}</p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-          {exercise.muscleGroup} · {exercise.sets}x {exercise.reps}
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{exercise.name}</p>
+          <MuscleGroupBadge group={exercise.muscleGroup} />
+        </div>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+          {exercise.sets}x {exercise.reps}
           {exercise.type === 'tempo' ? ` (${formatTime(Number(exercise.reps))})` : ''}
         </p>
       </div>

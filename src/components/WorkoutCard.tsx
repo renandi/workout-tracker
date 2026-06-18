@@ -105,7 +105,7 @@ export function WorkoutCard({ workout, totalSeconds, onEdit, onDelete, onUpdateE
           ))}
         </div>
       </div>
-      <div className="border-t border-gray-100 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
+      {/* <div className="border-t border-gray-100 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
         {workout.exercises.map((ex, i) => (
           <div key={ex.id} className="px-5 py-3 flex flex-col gap-1">
             <div className="flex justify-between items-start">
@@ -130,19 +130,19 @@ export function WorkoutCard({ workout, totalSeconds, onEdit, onDelete, onUpdateE
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 }
 
-function ExercisePill({ label, value }: { label: string; value: string }) {
-  return (
-    <span className="text-xs text-gray-500 dark:text-gray-400">
-      <span className="text-gray-400 dark:text-gray-600">{label}: </span>
-      {value}
-    </span>
-  );
-}
+// function ExercisePill({ label, value }: { label: string; value: string }) {
+//   return (
+//     <span className="text-xs text-gray-500 dark:text-gray-400">
+//       <span className="text-gray-400 dark:text-gray-600">{label}: </span>
+//       {value}
+//     </span>
+//   );
+// }
 
 function ChevronIcon({ expanded }: { expanded: boolean }) {
   return (

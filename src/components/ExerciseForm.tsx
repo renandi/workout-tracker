@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ExerciseCalibration } from './ExerciseCalibration';
+import { MuscleGroupBadge } from './MuscleGroupBadge';
 import { MUSCLE_GROUPS } from '../types/workout';
 import type { Exercise } from '../types/workout';
 
@@ -38,9 +39,12 @@ export function ExerciseForm({ exercise, index, onChange, onRemove }: ExerciseFo
         onChange={v => update({ name: v })}
       />
 
-      {/* Tag de grupo muscular */}
+      {/* Tag de grupo muscular — select + preview do badge */}
       <div className="flex flex-col gap-1">
-        <label className="text-xs text-gray-400 dark:text-gray-500">Grupo muscular</label>
+        <div className="flex items-center justify-between">
+          <label className="text-xs text-gray-400 dark:text-gray-500">Grupo muscular</label>
+          <MuscleGroupBadge group={exercise.muscleGroup} />
+        </div>
         <select
           value={exercise.muscleGroup}
           onChange={e => update({ muscleGroup: e.target.value as Exercise['muscleGroup'] })}
@@ -104,7 +108,6 @@ export function ExerciseForm({ exercise, index, onChange, onRemove }: ExerciseFo
         />
       </div>
 
-      {/* Tempo estimado com tooltip explicativo */}
       <div className="flex items-center gap-1.5">
         <span className="text-xs text-gray-400 dark:text-gray-500">
           Tempo estimado por set será usado no cálculo da duração total
@@ -120,7 +123,6 @@ export function ExerciseForm({ exercise, index, onChange, onRemove }: ExerciseFo
         onChange={v => update({ details: v || undefined })}
       />
 
-      {/* Calibração — discreta, abre só ao clicar */}
       <ExerciseCalibration
         exercise={exercise}
         onUpdate={times => update({ calibratedSetTimes: times })}
