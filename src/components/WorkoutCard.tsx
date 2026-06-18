@@ -1,12 +1,13 @@
 import { formatTime } from '../utils/workout';
-import type { Workout } from '../types/workout';
+import type { Exercise, Workout } from '../types/workout';
 import { useState } from 'react';
+import { ExerciseRow } from './ExerciseRow';
 
 const TYPE_STYLES: Record<Workout['type'], { bg: string; text: string }> = {
-  Força:  { bg: 'bg-red-100 dark:bg-red-900/30',    text: 'text-red-800 dark:text-red-400'    },
-  HIIT:   { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-800 dark:text-orange-400' },
-  Cardio: { bg: 'bg-blue-100 dark:bg-blue-900/30',   text: 'text-blue-800 dark:text-blue-400'   },
-  Yoga:   { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-800 dark:text-purple-400' },
+  Força: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-800 dark:text-red-400' },
+  HIIT: { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-800 dark:text-orange-400' },
+  Cardio: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-800 dark:text-blue-400' },
+  Yoga: { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-800 dark:text-purple-400' },
 };
 
 export function TypeBadge({ type }: { type: Workout['type'] }) {
@@ -24,9 +25,10 @@ interface WorkoutCardProps {
   totalSeconds: number;
   onEdit: () => void;
   onDelete: () => void;
+  onUpdateExercise: (exerciseId: string, fields: Partial<Exercise>) => void; // novo
 }
 
-export function WorkoutCard({ workout, totalSeconds, onEdit, onDelete }: WorkoutCardProps) {
+export function WorkoutCard({ workout, totalSeconds, onEdit, onDelete, onUpdateExercise }: WorkoutCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -91,37 +93,43 @@ export function WorkoutCard({ workout, totalSeconds, onEdit, onDelete }: Workout
       </div>
 
       {/* Lista de exercícios — expande/colapsa */}
-      <div
-        className={`transition-all duration-300 ease-in-out ${
-          expanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
-        }`}
-      >
+      <div className={`transition-all duration-300 ease-in-out ${expanded ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'}`}>
         <div className="border-t border-gray-100 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
           {workout.exercises.map((ex, i) => (
-            <div key={ex.id} className="px-5 py-3 flex flex-col gap-1">
-              <div className="flex justify-between items-start">
-                <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                  {i + 1}. {ex.name}
-                </span>
-                {ex.details && (
-                  <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full ml-2 shrink-0">
-                    {ex.details}
-                  </span>
-                )}
-              </div>
-              <div className="flex gap-3 flex-wrap">
-                <ExercisePill label="Grupo" value={ex.muscleGroup} />
-                <ExercisePill label="Sets" value={String(ex.sets)} />
-                <ExercisePill
-                  label={ex.type === 'tempo' ? 'Tempo' : 'Reps'}
-                  value={ex.type === 'tempo' ? formatTime(Number(ex.reps)) : ex.reps}
-                />
-                <ExercisePill label="Descanso" value={formatTime(ex.rest)} />
-                {ex.load && <ExercisePill label="Carga" value={`${ex.load}kg`} />}
-              </div>
-            </div>
+            <ExerciseRow
+              key={ex.id}
+              exercise={ex}
+              index={i}
+              onCalibrate={times => onUpdateExercise(ex.id, { calibratedSetTimes: times })}
+            />
           ))}
         </div>
+      </div>
+      <div className="border-t border-gray-100 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
+        {workout.exercises.map((ex, i) => (
+          <div key={ex.id} className="px-5 py-3 flex flex-col gap-1">
+            <div className="flex justify-between items-start">
+              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                {i + 1}. {ex.name}
+              </span>
+              {ex.details && (
+                <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full ml-2 shrink-0">
+                  {ex.details}
+                </span>
+              )}
+            </div>
+            <div className="flex gap-3 flex-wrap">
+              <ExercisePill label="Grupo" value={ex.muscleGroup} />
+              <ExercisePill label="Sets" value={String(ex.sets)} />
+              <ExercisePill
+                label={ex.type === 'tempo' ? 'Tempo' : 'Reps'}
+                value={ex.type === 'tempo' ? formatTime(Number(ex.reps)) : ex.reps}
+              />
+              <ExercisePill label="Descanso" value={formatTime(ex.rest)} />
+              {ex.load && <ExercisePill label="Carga" value={`${ex.load}kg`} />}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
