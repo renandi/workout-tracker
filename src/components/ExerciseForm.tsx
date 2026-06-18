@@ -1,4 +1,7 @@
-
+import { useState } from 'react';
+import { ExerciseCalibration } from './ExerciseCalibration';
+import { MuscleGroupBadge } from './MuscleGroupBadge';
+import { MUSCLE_GROUPS } from '../types/workout';
 import type { Exercise } from '../types/workout';
 
 interface ExerciseFormProps {
@@ -28,7 +31,6 @@ export function ExerciseForm({ exercise, index, onChange, onRemove }: ExerciseFo
         </button>
       </div>
 
-      {/* Nome */}
       <LabeledInput
         label="Nome"
         type="text"
@@ -37,7 +39,23 @@ export function ExerciseForm({ exercise, index, onChange, onRemove }: ExerciseFo
         onChange={v => update({ name: v })}
       />
 
-      {/* Modo: reps ou tempo */}
+      {/* Tag de grupo muscular — select + preview do badge */}
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center justify-between">
+          <label className="text-xs text-gray-400 dark:text-gray-500">Grupo muscular</label>
+          <MuscleGroupBadge group={exercise.muscleGroup} />
+        </div>
+        <select
+          value={exercise.muscleGroup}
+          onChange={e => update({ muscleGroup: e.target.value as Exercise['muscleGroup'] })}
+          className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+        >
+          {MUSCLE_GROUPS.map(g => (
+            <option key={g} value={g}>{g}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="flex gap-2">
         {(['reps', 'tempo'] as const).map(t => (
           <button
@@ -90,7 +108,13 @@ export function ExerciseForm({ exercise, index, onChange, onRemove }: ExerciseFo
         />
       </div>
 
-      {/* Detalhes — texto livre */}
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs text-gray-400 dark:text-gray-500">
+          Tempo estimado por set será usado no cálculo da duração total
+        </span>
+        <InfoTooltip text="Você pode calibrar o tempo real cronometrando um set, ou deixar o app estimar automaticamente com base nas reps." />
+      </div>
+
       <LabeledInput
         label="Observações (opcional)"
         type="text"
@@ -98,33 +122,57 @@ export function ExerciseForm({ exercise, index, onChange, onRemove }: ExerciseFo
         value={exercise.details ?? ''}
         onChange={v => update({ details: v || undefined })}
       />
+
+      <ExerciseCalibration
+        exercise={exercise}
+        onUpdate={times => update({ calibratedSetTimes: times })}
+      />
     </div>
   );
 }
 
+function InfoTooltip({ text }: { text: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <span className="relative inline-flex">
+      <button
+        type="button"
+        onClick={() => setShow(p => !p)}
+        onBlur={() => setShow(false)}
+        className="w-4 h-4 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-[10px] font-bold flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+        aria-label="Mais informações"
+      >
+        ?
+      </button>
+      {show && (
+        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-gray-800 dark:bg-gray-700 text-white text-xs rounded-lg p-2 shadow-lg z-10">
+          {text}
+        </span>
+      )}
+    </span>
+  );
+}
+
 function LabeledInput({
-  label,
-  value,
-  onChange,
-  ...rest
+  label, value, onChange, ...rest
 }: {
   label: string;
   value: number | string;
-  onChange: (v: string) => void; // ← recebe string
+  onChange: (v: string) => void;
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'>) {
-  // Omit é necessário pra evitar conflito com o onChange nativo do input
   return (
     <div className="flex flex-col gap-1 flex-1">
       <label className="text-xs text-gray-400 dark:text-gray-500">{label}</label>
       <input
         {...rest}
         value={value}
-        onChange={e => onChange(e.target.value)} // ← extrai o valor aqui
+        onChange={e => onChange(e.target.value)}
         className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-300 dark:placeholder:text-gray-600"
       />
     </div>
   );
 }
+
 function TrashIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"

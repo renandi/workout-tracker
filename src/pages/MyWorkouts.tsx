@@ -5,7 +5,7 @@ import { ConfirmModal } from '../components/ConfirmModal';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useTheme } from '../hooks/useTheme';
 import { calcTotalTime, importWorkoutsFromJson } from '../utils/workout';
-import type { Workout } from '../types/workout';
+import type { Exercise, Workout } from '../types/workout';
 import rawWorkouts from '../data/workouts.json';
 
 export function MyWorkouts() {
@@ -30,6 +30,14 @@ export function MyWorkouts() {
     const imported = importWorkoutsFromJson(rawWorkouts as any);
     setWorkouts(imported);
     setShowImportConfirm(false);
+  }
+
+  function handleUpdateExercise(workoutId: string, exerciseId: string, fields: Partial<Exercise>) {
+    setWorkouts(prev => prev.map(w =>
+      w.id === workoutId
+        ? { ...w, exercises: w.exercises.map(ex => ex.id === exerciseId ? { ...ex, ...fields } : ex) }
+        : w
+    ));
   }
 
   return (
@@ -73,6 +81,7 @@ export function MyWorkouts() {
           totalSeconds={calcTotalTime(w)}
           onEdit={() => setEditing(w)}
           onDelete={() => setWorkouts(prev => prev.filter(x => x.id !== w.id))}
+          onUpdateExercise={(exId, fields) => handleUpdateExercise(w.id, exId, fields)}
         />
       ))}
 
