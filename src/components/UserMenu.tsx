@@ -8,6 +8,7 @@ const ROLES: UserRole[] = ['aluno', 'personal_trainer', 'admin'];
 export function UserMenu() {
   const { session, profile, signInWithGoogle, signOut, updateRole } = useAuth();
   const [open, setOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,14 +33,22 @@ export function UserMenu() {
     );
   }
 
+  const showImage = profile?.avatar_url && !imgError;
+
   return (
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen(p => !p)}
-        className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-gray-100 dark:bg-gray-800"
+        className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-gray-100 dark:bg-gray-800 shrink-0"
       >
-        {profile?.avatar_url ? (
-          <img src={profile.avatar_url} alt={profile.name} className="w-full h-full object-cover" />
+        {showImage ? (
+          <img
+            src={profile.avatar_url!}
+            alt={profile.name}
+            referrerPolicy="no-referrer"
+            onError={() => setImgError(true)}
+            className="w-full h-full object-cover"
+          />
         ) : (
           <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
             {profile?.name?.[0]?.toUpperCase() ?? '?'}
@@ -48,43 +57,72 @@ export function UserMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-12 w-64 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-lg p-4 z-50 flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            {profile?.avatar_url && (
-              <img src={profile.avatar_url} alt={profile.name} className="w-10 h-10 rounded-full" />
-            )}
-            <div>
-              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{profile?.name}</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">{session.user.email}</p>
-            </div>
-          </div>
+        <>
+          {/* Backdrop no mobile — facilita fechar tocando fora, e impede scroll do fundo */}
+          <div
+            className="fixed inset-0 z-40 sm:hidden"
+            onClick={() => setOpen(false)}
+          />
 
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs text-gray-400 dark:text-gray-500">Seu papel</span>
-            <div className="flex gap-1.5 flex-wrap">
-              {ROLES.map(role => (
-                <button
-                  key={role}
-                  onClick={() => updateRole(role)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-                    profile?.role === role
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  {ROLE_LABELS[role]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <button
-            onClick={signOut}
-            className="text-sm text-red-500 hover:text-red-600 transition-colors text-left"
+          <div
+            className="
+              fixed sm:absolute
+              left-4 right-4 sm:left-auto sm:right-0
+              top-16 sm:top-12
+              sm:w-64
+              bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800
+              shadow-lg p-4 z-50 flex flex-col gap-4
+              max-h-[80vh] overflow-y-auto
+            "
           >
-            Sair
-          </button>
-        </div>
+            <div className="flex items-center gap-3">
+              {showImage ? (
+                <img
+                  src={profile.avatar_url!}
+                  alt={profile.name}
+                  referrerPolicy="no-referrer"
+                  className="w-10 h-10 rounded-full object-cover shrink-0"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    {profile?.name?.[0]?.toUpperCase() ?? '?'}
+                  </span>
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{profile?.name}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{session.user.email}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-gray-400 dark:text-gray-500">Seu papel</span>
+              <div className="flex gap-1.5 flex-wrap">
+                {ROLES.map(role => (
+                  <button
+                    key={role}
+                    onClick={() => updateRole(role)}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                      profile?.role === role
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {ROLE_LABELS[role]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={signOut}
+              className="text-sm text-red-500 hover:text-red-600 transition-colors text-left"
+            >
+              Sair
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
