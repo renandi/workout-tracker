@@ -1,9 +1,13 @@
 import type { Exercise, MuscleGroup, Workout } from '../types/workout';
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? '/api';
+// const BASE_URL = import.meta.env.VITE_API_URL ?? '/api';
+const BASE_URL = import.meta.env.DEV
+  ? 'http://localhost:3001/api'
+  : '/api';
 
 export interface LibraryWorkout extends Workout {
   author?: string;
+  authorAvatar?: string | null; // novo, opcional
   description?: string;
   likes?: number;
 }

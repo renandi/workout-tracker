@@ -32,7 +32,10 @@ export function LibraryCard({ workout, totalSeconds, onAdd }: LibraryCardProps) 
               </p>
             )}
             {workout.author && (
-              <p className="text-xs text-gray-300 dark:text-gray-600 mt-0.5">
+              <p className="text-xs text-gray-300 dark:text-gray-600 mt-0.5 flex items-center gap-1.5">
+                {workout.authorAvatar && (
+                  <img src={workout.authorAvatar} alt={workout.author} className="w-4 h-4 rounded-full" referrerPolicy="no-referrer" />
+                )}
                 por {workout.author}
               </p>
             )}
@@ -55,11 +58,10 @@ export function LibraryCard({ workout, totalSeconds, onAdd }: LibraryCardProps) 
           <button
             onClick={handleAdd}
             disabled={added}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all active:scale-95 ${
-              added
+            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all active:scale-95 ${added
                 ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 cursor-default'
                 : 'bg-blue-600 text-white hover:bg-blue-700'
-            }`}
+              }`}
           >
             {added ? '✓ Adicionado' : '+ Minha lista'}
           </button>
