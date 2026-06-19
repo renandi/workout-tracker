@@ -1,9 +1,31 @@
 import type { Exercise, MuscleGroup, Workout } from '../types/workout';
+import { supabase } from '../lib/supabase';
 
 // const BASE_URL = import.meta.env.VITE_API_URL ?? '/api';
 const BASE_URL = import.meta.env.DEV
   ? 'http://localhost:3001/api'
   : '/api';
+
+async function authedRequest<T>(path: string, options?: RequestInit): Promise<T> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const res = await fetch(`${BASE_URL}${path}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session?.access_token}`,
+    },
+    ...options,
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
+export interface UserWorkout {
+  userWorkoutId: string;
+  isFavorite: boolean;
+  isActive: boolean;
+  workout: Workout;
+}
+
 
 export interface LibraryWorkout extends Workout {
   author?: string;
@@ -44,6 +66,26 @@ export const api = {
   getRoutines: () => request<Routine[]>('/routines'),
   createRoutine: (routine: Omit<Routine, 'id'>) =>
     request<Routine>('/routines', { method: 'POST', body: JSON.stringify(routine) }),
+
+    getUserWorkouts: () => authedRequest<UserWorkout[]>('/user-workouts'),
+
+  addUserWorkout: (workoutId: string, isFavorite = false) =>
+    authedRequest<UserWorkout>('/user-workouts', {
+      method: 'POST',
+      body: JSON.stringify({ workoutId, isFavorite }),
+    }),
+
+  updateUserWorkout: (userWorkoutId: string, fields: { isFavorite?: boolean; isActive?: boolean }) =>
+    authedRequest<UserWorkout>('/user-workouts', {
+      method: 'PATCH',
+      body: JSON.stringify({ userWorkoutId, ...fields }),
+    }),
+
+  removeUserWorkout: (userWorkoutId: string) =>
+    authedRequest<void>('/user-workouts', {
+      method: 'DELETE',
+      body: JSON.stringify({ userWorkoutId }),
+    }),
 };
 
 export function filterByMuscleGroup<T extends { muscleGroup?: MuscleGroup }>(
@@ -53,11 +95,6 @@ export function filterByMuscleGroup<T extends { muscleGroup?: MuscleGroup }>(
   if (group === 'Todos') return items;
   return items.filter(i => i.muscleGroup === group);
 }
-
-
-/* SUPABASE */
-import { supabase } from '../lib/supabase';
-// import type { Workout } from '../types/workout';
 
 export async function publishWorkout(workout: Workout, userId: string, description?: string) {
   const { data: libWorkout, error } = await supabase

@@ -15,7 +15,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "GET") {
     const { data: workouts, error } = await supabase
       .from("library_workouts")
-      .select("*, library_workout_exercises(*), profiles(name, avatar_url)")
+      .select(
+        "*, workout_exercises(*, exercise_catalog(*)), profiles(name, avatar_url)",
+      )
       .order("created_at", { ascending: false });
 
     if (error) return res.status(500).json({ error: error.message });
@@ -25,20 +27,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       title: w.title,
       type: w.type,
       description: w.description,
-      author: w.profiles?.name ?? "Desconhecido", // ← nome em vez do UUID
+      author: w.profiles?.name ?? "Desconhecido",
       authorAvatar: w.profiles?.avatar_url ?? null,
-      exercises: w.library_workout_exercises
+      exercises: w.workout_exercises
         .sort((a: any, b: any) => a.position - b.position)
-        .map((ex: any) => ({
-          id: ex.id,
-          name: ex.name,
-          type: ex.type,
-          muscleGroup: ex.muscle_group,
-          sets: ex.sets,
-          reps: ex.reps,
-          rest: ex.rest,
-          load: ex.load,
-          details: ex.details,
+        .map((we: any) => ({
+          id: we.exercise_catalog.id,
+          name: we.exercise_catalog.name,
+          muscleGroup: we.exercise_catalog.muscle_group,
+          type: we.exercise_catalog.type,
+          executionTip: we.exercise_catalog.execution_tip,
+          sets: we.sets,
+          reps: we.reps,
+          rest: we.rest,
+          load: we.load,
+          details: we.details,
         })),
     }));
 

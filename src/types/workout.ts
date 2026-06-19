@@ -11,17 +11,21 @@ export const MUSCLE_GROUPS: MuscleGroup[] = [
   'Abdômen', 'Cardio', 'Corpo todo',
 ];
 
-export interface Exercise {
+export interface ExerciseCatalogItem {
   id: string;
   name: string;
-  type: ExerciseType;
   muscleGroup: MuscleGroup;
+  type: ExerciseType;
+  executionTip?: string;
+}
+
+export interface Exercise extends ExerciseCatalogItem {
+  // dados específicos da execução nesse treino
   sets: number;
   reps: string;
   rest: number;
   load: number | null;
   details?: string;
-  // Tempo médio por set, em segundos — pode vir de calibração (cronômetro) OU manual
   manualSetSeconds?: number;
   calibratedSetTimes?: number[];
 }
