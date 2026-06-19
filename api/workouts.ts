@@ -1,122 +1,52 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
-import { randomUUID } from 'crypto';
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { createClient } from "@supabase/supabase-js";
 
-const DB_PATH = join('/tmp', 'workouts.json');
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+);
 
-const SEED = [
-  {
-    id: randomUUID(),
-    title: 'Peito e Tríceps',
-    type: 'Força',
-    description: 'Foco em hipertrofia de peitoral e tríceps com compostos e isoladores.',
-    author: 'Ficha',
-    exercises: [
-      { id: randomUUID(), name: 'Supino Reto', type: 'reps', muscleGroup: 'Peito', sets: 4, reps: '6-9', rest: 90, load: null },
-      { id: randomUUID(), name: 'Supino Inclinado', type: 'reps', muscleGroup: 'Peito', sets: 3, reps: '8-10', rest: 75, load: null },
-      { id: randomUUID(), name: 'Cross Over', type: 'reps', muscleGroup: 'Peito', sets: 3, reps: '10-12', rest: 60, load: null },
-      { id: randomUUID(), name: 'Tríceps Francês', type: 'reps', muscleGroup: 'Tríceps', sets: 3, reps: '8-10', rest: 60, load: null },
-      { id: randomUUID(), name: 'Tríceps Corda', type: 'reps', muscleGroup: 'Tríceps', sets: 3, reps: '10-12', rest: 60, load: null, details: 'DROP' },
-    ],
-  },
-  {
-    id: randomUUID(),
-    title: 'Costas e Bíceps',
-    type: 'Força',
-    description: 'Treino de puxada com ênfase em largura e espessura das costas.',
-    author: 'Ficha',
-    exercises: [
-      { id: randomUUID(), name: 'Barra Fixa', type: 'reps', muscleGroup: 'Costas', sets: 3, reps: 'X', rest: 90, load: null },
-      { id: randomUUID(), name: 'Remada Baixa', type: 'reps', muscleGroup: 'Costas', sets: 4, reps: '6-9', rest: 75, load: null },
-      { id: randomUUID(), name: 'Puxada Frente', type: 'reps', muscleGroup: 'Costas', sets: 3, reps: '8-10', rest: 60, load: null },
-      { id: randomUUID(), name: 'Rosca Direta', type: 'reps', muscleGroup: 'Bíceps', sets: 3, reps: '8-10', rest: 60, load: null },
-      { id: randomUUID(), name: 'Rosca Martelo', type: 'reps', muscleGroup: 'Bíceps', sets: 3, reps: '10-12', rest: 60, load: null },
-    ],
-  },
-  {
-    id: randomUUID(),
-    title: 'Pernas — Quad e Glúteo',
-    type: 'Força',
-    description: 'Foco em quadríceps e glúteos com agachamento e leg press.',
-    author: 'Ficha',
-    exercises: [
-      { id: randomUUID(), name: 'Agachamento Livre', type: 'reps', muscleGroup: 'Perna', sets: 4, reps: '6-9', rest: 120, load: null, details: 'AQ+6-9' },
-      { id: randomUUID(), name: 'Leg Press', type: 'reps', muscleGroup: 'Perna', sets: 4, reps: '8-10', rest: 90, load: null, details: 'REST PAUSE' },
-      { id: randomUUID(), name: 'Cadeira Extensora', type: 'reps', muscleGroup: 'Perna', sets: 3, reps: '10-12', rest: 60, load: null },
-      { id: randomUUID(), name: 'Passada c/ Halter', type: 'reps', muscleGroup: 'Glúteo', sets: 3, reps: '16-20', rest: 60, load: null },
-      { id: randomUUID(), name: 'Panturrilha Sentado', type: 'reps', muscleGroup: 'Panturrilha', sets: 4, reps: '8-10', rest: 45, load: null },
-    ],
-  },
-  {
-    id: randomUUID(),
-    title: 'Pernas — Posterior',
-    type: 'Força',
-    description: 'Ênfase em isquiotibiais, glúteos e panturrilha.',
-    author: 'Ficha',
-    exercises: [
-      { id: randomUUID(), name: 'Cadeira Flexora', type: 'reps', muscleGroup: 'Perna', sets: 4, reps: '6-9', rest: 75, load: null },
-      { id: randomUUID(), name: 'Stiff', type: 'reps', muscleGroup: 'Perna', sets: 3, reps: '8-10', rest: 75, load: null },
-      { id: randomUUID(), name: 'Flexão Nórdica', type: 'reps', muscleGroup: 'Perna', sets: 3, reps: 'X', rest: 90, load: null },
-      { id: randomUUID(), name: 'Flexor Deitado', type: 'reps', muscleGroup: 'Perna', sets: 3, reps: '10-12', rest: 60, load: null },
-      { id: randomUUID(), name: 'Prancha Isométrica', type: 'tempo', muscleGroup: 'Abdômen', sets: 3, reps: '60', rest: 60, load: null, details: '1min' },
-    ],
-  },
-  {
-    id: randomUUID(),
-    title: 'Ombros e Trapézio',
-    type: 'Força',
-    description: 'Desenvolvimento de ombros com isoladores e trabalho de trapézio.',
-    author: 'Ficha',
-    exercises: [
-      { id: randomUUID(), name: 'Desenvolvimento Máquina', type: 'reps', muscleGroup: 'Ombro', sets: 4, reps: '6-9', rest: 90, load: null },
-      { id: randomUUID(), name: 'Elevação Lateral', type: 'reps', muscleGroup: 'Ombro', sets: 4, reps: '10-12', rest: 60, load: null },
-      { id: randomUUID(), name: 'Elevação Frontal', type: 'reps', muscleGroup: 'Ombro', sets: 3, reps: '10-12', rest: 60, load: null },
-      { id: randomUUID(), name: 'Crucifixo Inverso', type: 'reps', muscleGroup: 'Ombro', sets: 3, reps: '10-12', rest: 60, load: null },
-      { id: randomUUID(), name: 'Encolhimento de Ombro', type: 'reps', muscleGroup: 'Ombro', sets: 4, reps: '8-10', rest: 60, load: null },
-    ],
-  },
-  {
-    id: randomUUID(),
-    title: 'HIIT 20min',
-    type: 'HIIT',
-    description: 'Circuito de alta intensidade sem equipamento. 20 segundos de esforço, 10 de descanso.',
-    author: 'Ficha',
-    exercises: [
-      { id: randomUUID(), name: 'Burpee', type: 'tempo', muscleGroup: 'Corpo todo', sets: 4, reps: '20', rest: 10, load: null },
-      { id: randomUUID(), name: 'Mountain Climber', type: 'tempo', muscleGroup: 'Abdômen', sets: 4, reps: '20', rest: 10, load: null },
-      { id: randomUUID(), name: 'Jump Squat', type: 'tempo', muscleGroup: 'Perna', sets: 4, reps: '20', rest: 10, load: null },
-      { id: randomUUID(), name: 'Polichinelo', type: 'tempo', muscleGroup: 'Cardio', sets: 4, reps: '20', rest: 10, load: null },
-      { id: randomUUID(), name: 'Sprint Estacionário', type: 'tempo', muscleGroup: 'Cardio', sets: 4, reps: '20', rest: 10, load: null },
-    ],
-  },
-];
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
 
-function readDb() {
-  if (!existsSync(DB_PATH)) return SEED;
-  const data = JSON.parse(readFileSync(DB_PATH, 'utf-8'));
-  return data.length === 0 ? SEED : data;
-}
+  if (req.method === "OPTIONS") return res.status(200).end();
 
-function writeDb(data: unknown) {
-  writeFileSync(DB_PATH, JSON.stringify(data));
-}
+  if (req.method === "GET") {
+    const { data: workouts, error } = await supabase
+      .from("library_workouts")
+      .select(
+        "*, workout_exercises(*, exercise_catalog(*)), profiles(name, avatar_url)",
+      )
+      .order("created_at", { ascending: false });
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (error) return res.status(500).json({ error: error.message });
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method === 'GET') return res.status(200).json(readDb());
+    const formatted = workouts.map((w) => ({
+      id: w.id,
+      title: w.title,
+      type: w.type,
+      description: w.description,
+      author: w.profiles?.name ?? "Desconhecido",
+      authorAvatar: w.profiles?.avatar_url ?? null,
+      exercises: w.workout_exercises
+        .sort((a: any, b: any) => a.position - b.position)
+        .map((we: any) => ({
+          id: we.exercise_catalog.id,
+          name: we.exercise_catalog.name,
+          muscleGroup: we.exercise_catalog.muscle_group,
+          type: we.exercise_catalog.type,
+          executionTip: we.exercise_catalog.execution_tip,
+          sets: we.sets,
+          reps: we.reps,
+          rest: we.rest,
+          load: we.load,
+          details: we.details,
+        })),
+    }));
 
-  if (req.method === 'POST') {
-    const workouts = readDb();
-    const newWorkout = { ...req.body, id: randomUUID() };
-    workouts.push(newWorkout);
-    writeDb(workouts);
-    return res.status(201).json(newWorkout);
+    return res.status(200).json(formatted);
   }
 
-  return res.status(405).json({ error: 'Method not allowed' });
+  return res.status(405).json({ error: "Method not allowed" });
 }

@@ -12,34 +12,37 @@ export function formatTime(seconds: number): string {
   return rem > 0 ? `${h}h ${rem}min` : `${h}h`;
 }
 
-// Tempo médio calibrado por set, ou null se nunca foi calibrado
 export function getCalibratedAverage(exercise: Exercise): number | null {
   const times = exercise.calibratedSetTimes;
   if (!times || times.length === 0) return null;
   return Math.round(times.reduce((a, b) => a + b, 0) / times.length);
 }
 
-// Estimativa de duração de UM set, em segundos
-function estimateSetDuration(exercise: Exercise): number {
+export function calcExerciseTotalTime(exercise: Exercise): number {
+  const setDuration = estimateSetDuration(exercise); // já existe, mas hoje é privada — torna exportável
+  const totalSetsTime = setDuration * exercise.sets;
+  const totalRestTime = exercise.rest * exercise.sets;
+  return totalSetsTime + totalRestTime;
+}
+
+// torna exportada (antes era função privada do módulo)
+export function estimateSetDuration(exercise: Exercise): number {
   const calibrated = getCalibratedAverage(exercise);
   if (calibrated !== null) return calibrated;
+
+  if (exercise.manualSetSeconds !== undefined && exercise.manualSetSeconds > 0) {
+    return exercise.manualSetSeconds;
+  }
 
   if (exercise.type === 'tempo') {
     return Number(exercise.reps) || 0;
   }
-
-  // Sem calibração e por reps: estimativa genérica de 2.5s por rep
   const repsNumber = parseInt(exercise.reps, 10) || 10;
   return Math.round(repsNumber * 2.5);
 }
 
 export function calcTotalTime(workout: Workout): number {
-  return workout.exercises.reduce((acc, ex) => {
-    const setDuration = estimateSetDuration(ex);
-    const totalSetsTime = setDuration * ex.sets;
-    const totalRestTime = ex.rest * ex.sets;
-    return acc + totalSetsTime + totalRestTime;
-  }, 0);
+  return workout.exercises.reduce((acc, ex) => acc + calcExerciseTotalTime(ex), 0);
 }
 
 export function generateId(): string {

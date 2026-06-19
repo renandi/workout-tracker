@@ -7,6 +7,7 @@ import { MuscleGroupFilter } from '../components/MuscleGroupFilter';
 import { calcTotalTime, generateId } from '../utils/workout';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import type { Workout, MuscleGroup } from '../types/workout';
+import { useUserWorkouts } from '../hooks/useUserWorkouts';
 
 type Tab = 'treinos' | 'exercicios' | 'rotinas';
 
@@ -21,6 +22,11 @@ export function Library() {
   const [muscleFilter, setMuscleFilter] = useState<MuscleGroup | 'Todos'>('Todos');
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const [, setMyWorkouts] = useLocalStorage<Workout[]>('workouts', []);
+  const { addFromLibrary } = useUserWorkouts();
+
+  function handleAddToCollection(workout: LibraryWorkout) {
+    addFromLibrary(workout);
+  }
 
   useEffect(() => {
     async function load() {
@@ -41,12 +47,6 @@ export function Library() {
     load();
   }, []);
 
-  function handleAddToCollection(workout: LibraryWorkout) {
-    setMyWorkouts(prev => {
-      if (prev.some(w => w.id === workout.id)) return prev;
-      return [...prev, workout];
-    });
-  }
 
   function toggleExercise(id: string) {
     setSelectedExercises(prev =>
@@ -80,11 +80,10 @@ export function Library() {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
-              tab === t
+            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${tab === t
                 ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm'
                 : 'text-gray-500 dark:text-gray-400'
-            }`}
+              }`}
           >
             {t}
           </button>

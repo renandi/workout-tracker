@@ -61,11 +61,10 @@ export function ExerciseForm({ exercise, index, onChange, onRemove }: ExerciseFo
           <button
             key={t}
             onClick={() => update({ type: t })}
-            className={`flex-1 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              exercise.type === t
+            className={`flex-1 py-1.5 rounded-lg text-sm font-medium transition-colors ${exercise.type === t
                 ? 'bg-blue-600 text-white'
                 : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-blue-300'
-            }`}
+              }`}
           >
             {t === 'reps' ? 'Por reps' : 'Por tempo'}
           </button>
@@ -125,7 +124,7 @@ export function ExerciseForm({ exercise, index, onChange, onRemove }: ExerciseFo
 
       <ExerciseCalibration
         exercise={exercise}
-        onUpdate={times => update({ calibratedSetTimes: times })}
+        onUpdate={fields => update(fields)}
       />
     </div>
   );
