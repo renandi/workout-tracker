@@ -1,5 +1,7 @@
+// src/components/UserMenu.tsx
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { SettingsModal } from './SettingsModal';
 import { ROLE_LABELS } from '../types/user';
 import type { UserRole } from '../types/user';
 
@@ -8,6 +10,7 @@ const ROLES: UserRole[] = ['aluno', 'personal_trainer', 'admin'];
 export function UserMenu() {
   const { session, profile, signInWithGoogle, signOut, updateRole } = useAuth();
   const [open, setOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false); // ← novo
   const [imgError, setImgError] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -58,23 +61,17 @@ export function UserMenu() {
 
       {open && (
         <>
-          {/* Backdrop no mobile — facilita fechar tocando fora, e impede scroll do fundo */}
-          <div
-            className="fixed inset-0 z-40 sm:hidden"
-            onClick={() => setOpen(false)}
-          />
+          <div className="fixed inset-0 z-40 sm:hidden" onClick={() => setOpen(false)} />
 
-          <div
-            className="
-              fixed sm:absolute
-              left-4 right-4 sm:left-auto sm:right-0
-              top-16 sm:top-12
-              sm:w-64
-              bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800
-              shadow-lg p-4 z-50 flex flex-col gap-4
-              max-h-[80vh] overflow-y-auto
-            "
-          >
+          <div className="
+            fixed sm:absolute
+            left-4 right-4 sm:left-auto sm:right-0
+            top-16 sm:top-12
+            sm:w-64
+            bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800
+            shadow-lg p-4 z-50 flex flex-col gap-4
+            max-h-[80vh] overflow-y-auto
+          ">
             <div className="flex items-center gap-3">
               {showImage ? (
                 <img
@@ -115,6 +112,15 @@ export function UserMenu() {
               </div>
             </div>
 
+            {/* Botão de configurações — novo */}
+            <button
+              onClick={() => { setSettingsOpen(true); setOpen(false); }}
+              className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 transition-colors text-left flex items-center gap-2"
+            >
+              <GearIcon />
+              Configurações
+            </button>
+
             <button
               onClick={signOut}
               className="text-sm text-red-500 hover:text-red-600 transition-colors text-left"
@@ -124,7 +130,20 @@ export function UserMenu() {
           </div>
         </>
       )}
+
+      {/* Modal de configurações — novo */}
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
+  );
+}
+
+function GearIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
   );
 }
 

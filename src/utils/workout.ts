@@ -18,17 +18,22 @@ export function getCalibratedAverage(exercise: Exercise): number | null {
   return Math.round(times.reduce((a, b) => a + b, 0) / times.length);
 }
 
-function estimateSetDuration(exercise: Exercise): number {
-  // 1. Prioridade: calibração via cronômetro (mais preciso, é medido)
+export function calcExerciseTotalTime(exercise: Exercise): number {
+  const setDuration = estimateSetDuration(exercise); // já existe, mas hoje é privada — torna exportável
+  const totalSetsTime = setDuration * exercise.sets;
+  const totalRestTime = exercise.rest * exercise.sets;
+  return totalSetsTime + totalRestTime;
+}
+
+// torna exportada (antes era função privada do módulo)
+export function estimateSetDuration(exercise: Exercise): number {
   const calibrated = getCalibratedAverage(exercise);
   if (calibrated !== null) return calibrated;
 
-  // 2. Segunda opção: valor digitado manualmente pelo usuário
   if (exercise.manualSetSeconds !== undefined && exercise.manualSetSeconds > 0) {
     return exercise.manualSetSeconds;
   }
 
-  // 3. Fallback: estimativa automática
   if (exercise.type === 'tempo') {
     return Number(exercise.reps) || 0;
   }
@@ -37,12 +42,7 @@ function estimateSetDuration(exercise: Exercise): number {
 }
 
 export function calcTotalTime(workout: Workout): number {
-  return workout.exercises.reduce((acc, ex) => {
-    const setDuration = estimateSetDuration(ex);
-    const totalSetsTime = setDuration * ex.sets;
-    const totalRestTime = ex.rest * ex.sets;
-    return acc + totalSetsTime + totalRestTime;
-  }, 0);
+  return workout.exercises.reduce((acc, ex) => acc + calcExerciseTotalTime(ex), 0);
 }
 
 export function generateId(): string {

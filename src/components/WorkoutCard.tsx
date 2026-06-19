@@ -120,7 +120,7 @@ export function WorkoutCard({ workout, totalSeconds, onEdit, onDelete, onUpdateE
               key={ex.id}
               exercise={ex}
               index={i}
-              onCalibrate={fields => onUpdateExercise(ex.id, fields)}
+              onUpdate={fields => onUpdateExercise(ex.id, fields)}
             />
           ))}
         </div>

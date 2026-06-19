@@ -2,44 +2,36 @@ import { useState } from 'react';
 import { WorkoutCard } from '../components/WorkoutCard';
 import { CreateWorkoutModal } from '../components/CreateWorkoutModal';
 import { ConfirmModal } from '../components/ConfirmModal';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import { UserMenu } from '../components/UserMenu';
+import { useUserWorkouts } from '../hooks/useUserWorkouts';
 import { useTheme } from '../hooks/useTheme';
 import { calcTotalTime, importWorkoutsFromJson } from '../utils/workout';
-import type { Exercise, Workout } from '../types/workout';
-import { UserMenu } from '../components/UserMenu';
+import type { Workout } from '../types/workout';
 import rawWorkouts from '../data/workouts.json';
-
 
 export function MyWorkouts() {
   const { theme, toggleTheme } = useTheme();
-  const [workouts, setWorkouts] = useLocalStorage<Workout[]>('workouts', []);
+  const { workouts, loading, loggedIn, addWorkout, updateWorkout, removeWorkout, updateExercise } = useUserWorkouts();
   const [editing, setEditing] = useState<Workout | null>(null);
   const [creating, setCreating] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
 
-  function handleSave(workout: Workout) {
-    setWorkouts(prev => {
-      const exists = prev.some(w => w.id === workout.id);
-      return exists
-        ? prev.map(w => w.id === workout.id ? workout : w)
-        : [...prev, workout];
-    });
+  async function handleSave(workout: Workout) {
+    if (editing) {
+      await updateWorkout(workout.id, { title: workout.title, type: workout.type, exercises: workout.exercises });
+    } else {
+      await addWorkout({ title: workout.title, type: workout.type, exercises: workout.exercises });
+    }
     setEditing(null);
     setCreating(false);
   }
 
-  function handleImport() {
+  async function handleImport() {
     const imported = importWorkoutsFromJson(rawWorkouts as any);
-    setWorkouts(imported);
+    for (const w of imported) {
+      await addWorkout({ title: w.title, type: w.type, exercises: w.exercises });
+    }
     setShowImportConfirm(false);
-  }
-
-  function handleUpdateExercise(workoutId: string, exerciseId: string, fields: Partial<Exercise>) {
-    setWorkouts(prev => prev.map(w =>
-      w.id === workoutId
-        ? { ...w, exercises: w.exercises.map(ex => ex.id === exerciseId ? { ...ex, ...fields } : ex) }
-        : w
-    ));
   }
 
   return (
@@ -48,11 +40,7 @@ export function MyWorkouts() {
         <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Meus treinos</h1>
         <div className="flex items-center gap-2">
           <UserMenu />
-          <button
-            onClick={toggleTheme}
-            className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            aria-label="Alternar tema"
-          >
+          <button onClick={toggleTheme} className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Alternar tema">
             {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
           </button>
           <button
@@ -61,30 +49,34 @@ export function MyWorkouts() {
           >
             Importar
           </button>
-          <button
-            onClick={() => setCreating(true)}
-            className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-all text-xl leading-none"
-            aria-label="Criar novo treino"
-          >
+          <button onClick={() => setCreating(true)} className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-all text-xl leading-none" aria-label="Criar novo treino">
             +
           </button>
         </div>
       </div>
 
-      {workouts.length === 0 && (
+      {!loggedIn && (
+        <p className="text-center text-amber-600 dark:text-amber-400 text-xs bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2 mb-4">
+          Você não está logado — seus treinos ficam salvos só neste navegador. Entre para sincronizar entre dispositivos.
+        </p>
+      )}
+
+      {loading && <p className="text-center text-gray-400 dark:text-gray-500 text-sm mt-16">Carregando...</p>}
+
+      {!loading && workouts.length === 0 && (
         <p className="text-center text-gray-400 dark:text-gray-500 text-sm mt-16">
           Nenhum treino ainda. Toque em + para criar.
         </p>
       )}
 
-      {workouts.map(w => (
+      {!loading && workouts.map(w => (
         <WorkoutCard
           key={w.id}
           workout={w}
           totalSeconds={calcTotalTime(w)}
           onEdit={() => setEditing(w)}
-          onDelete={() => setWorkouts(prev => prev.filter(x => x.id !== w.id))}
-          onUpdateExercise={(exId, fields) => handleUpdateExercise(w.id, exId, fields)}
+          onDelete={() => removeWorkout(w.id)}
+          onUpdateExercise={(exId, fields) => updateExercise(w.id, exId, fields)}
         />
       ))}
 
@@ -99,10 +91,10 @@ export function MyWorkouts() {
       <ConfirmModal
         open={showImportConfirm}
         title="Substituir treinos?"
-        description="Isso irá apagar todos os seus treinos atuais e substituir pelos treinos importados. Essa ação não pode ser desfeita."
-        confirmLabel="Sim, substituir"
+        description="Isso irá adicionar os treinos importados à sua lista atual. Treinos com o mesmo nome podem duplicar."
+        confirmLabel="Sim, importar"
         cancelLabel="Cancelar"
-        variant="danger"
+        variant="warning"
         onConfirm={handleImport}
         onCancel={() => setShowImportConfirm(false)}
       />

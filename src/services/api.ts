@@ -1,16 +1,19 @@
-import type { Exercise, MuscleGroup, Workout } from '../types/workout';
-import { supabase } from '../lib/supabase';
+import type { Exercise, MuscleGroup, Workout } from "../types/workout";
+import { supabase } from "../lib/supabase";
 
 // const BASE_URL = import.meta.env.VITE_API_URL ?? '/api';
-const BASE_URL = import.meta.env.DEV
-  ? 'http://localhost:3001/api'
-  : '/api';
+const BASE_URL = import.meta.env.DEV ? "http://localhost:3001/api" : "/api";
 
-async function authedRequest<T>(path: string, options?: RequestInit): Promise<T> {
-  const { data: { session } } = await supabase.auth.getSession();
+async function authedRequest<T>(
+  path: string,
+  options?: RequestInit,
+): Promise<T> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${session?.access_token}`,
     },
     ...options,
@@ -19,13 +22,18 @@ async function authedRequest<T>(path: string, options?: RequestInit): Promise<T>
   return res.json();
 }
 
+export interface CreateWorkoutPayload {
+  title: string;
+  type: Workout["type"];
+  exercises: Exercise[];
+}
+
 export interface UserWorkout {
   userWorkoutId: string;
   isFavorite: boolean;
   isActive: boolean;
   workout: Workout;
 }
-
 
 export interface LibraryWorkout extends Workout {
   author?: string;
@@ -48,7 +56,7 @@ export interface Routine {
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { "Content-Type": "application/json" },
     ...options,
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -56,49 +64,77 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  getWorkouts: () => request<LibraryWorkout[]>('/workouts'),
+  getWorkouts: () => request<LibraryWorkout[]>("/workouts"),
   getWorkout: (id: string) => request<LibraryWorkout>(`/workouts/${id}`),
-  createWorkout: (workout: Omit<LibraryWorkout, 'id'>) =>
-    request<LibraryWorkout>('/workouts', { method: 'POST', body: JSON.stringify(workout) }),
+  createWorkout: (workout: Omit<LibraryWorkout, "id">) =>
+    request<LibraryWorkout>("/workouts", {
+      method: "POST",
+      body: JSON.stringify(workout),
+    }),
 
-  getExercises: () => request<LibraryExercise[]>('/exercises'),
+  getExercises: () => request<LibraryExercise[]>("/exercises"),
 
-  getRoutines: () => request<Routine[]>('/routines'),
-  createRoutine: (routine: Omit<Routine, 'id'>) =>
-    request<Routine>('/routines', { method: 'POST', body: JSON.stringify(routine) }),
+  getRoutines: () => request<Routine[]>("/routines"),
+  createRoutine: (routine: Omit<Routine, "id">) =>
+    request<Routine>("/routines", {
+      method: "POST",
+      body: JSON.stringify(routine),
+    }),
 
-    getUserWorkouts: () => authedRequest<UserWorkout[]>('/user-workouts'),
+  getUserWorkouts: () => authedRequest<UserWorkout[]>("/user-workouts"),
 
   addUserWorkout: (workoutId: string, isFavorite = false) =>
-    authedRequest<UserWorkout>('/user-workouts', {
-      method: 'POST',
+    authedRequest<UserWorkout>("/user-workouts", {
+      method: "POST",
       body: JSON.stringify({ workoutId, isFavorite }),
     }),
 
-  updateUserWorkout: (userWorkoutId: string, fields: { isFavorite?: boolean; isActive?: boolean }) =>
-    authedRequest<UserWorkout>('/user-workouts', {
-      method: 'PATCH',
+  updateUserWorkout: (
+    userWorkoutId: string,
+    fields: { isFavorite?: boolean; isActive?: boolean },
+  ) =>
+    authedRequest<UserWorkout>("/user-workouts", {
+      method: "PATCH",
       body: JSON.stringify({ userWorkoutId, ...fields }),
     }),
 
   removeUserWorkout: (userWorkoutId: string) =>
-    authedRequest<void>('/user-workouts', {
-      method: 'DELETE',
+    authedRequest<void>("/user-workouts", {
+      method: "DELETE",
       body: JSON.stringify({ userWorkoutId }),
+    }),
+
+  createOwnWorkout: (payload: CreateWorkoutPayload) =>
+    authedRequest<{ workoutId: string; userWorkoutId: string }>(
+      "/own-workouts",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+    ),
+
+  updateOwnWorkout: (workoutId: string, payload: CreateWorkoutPayload) =>
+    authedRequest<{ workoutId: string }>("/own-workouts", {
+      method: "PATCH",
+      body: JSON.stringify({ workoutId, ...payload }),
     }),
 };
 
 export function filterByMuscleGroup<T extends { muscleGroup?: MuscleGroup }>(
   items: T[],
-  group: MuscleGroup | 'Todos'
+  group: MuscleGroup | "Todos",
 ): T[] {
-  if (group === 'Todos') return items;
-  return items.filter(i => i.muscleGroup === group);
+  if (group === "Todos") return items;
+  return items.filter((i) => i.muscleGroup === group);
 }
 
-export async function publishWorkout(workout: Workout, userId: string, description?: string) {
+export async function publishWorkout(
+  workout: Workout,
+  userId: string,
+  description?: string,
+) {
   const { data: libWorkout, error } = await supabase
-    .from('library_workouts')
+    .from("library_workouts")
     .insert({
       author_id: userId,
       title: workout.title,
@@ -124,7 +160,7 @@ export async function publishWorkout(workout: Workout, userId: string, descripti
   }));
 
   const { error: exError } = await supabase
-    .from('library_workout_exercises')
+    .from("library_workout_exercises")
     .insert(exercisesPayload);
 
   if (exError) throw exError;
@@ -132,9 +168,12 @@ export async function publishWorkout(workout: Workout, userId: string, descripti
   return libWorkout;
 }
 
-export async function publishExercise(exercise: Workout['exercises'][number], userId: string) {
+export async function publishExercise(
+  exercise: Workout["exercises"][number],
+  userId: string,
+) {
   const { data, error } = await supabase
-    .from('library_exercises')
+    .from("library_exercises")
     .insert({
       author_id: userId,
       name: exercise.name,
