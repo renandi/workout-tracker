@@ -2,6 +2,8 @@ import { formatTime } from '../utils/workout';
 import type { Exercise, Workout } from '../types/workout';
 import { useState } from 'react';
 import { ExerciseRow } from './ExerciseRow';
+import { useAuth } from '../hooks/useAuth';
+import { publishWorkout } from '../services/api';
 
 const TYPE_STYLES: Record<Workout['type'], { bg: string; text: string }> = {
   Força: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-800 dark:text-red-400' },
@@ -30,6 +32,19 @@ interface WorkoutCardProps {
 
 export function WorkoutCard({ workout, totalSeconds, onEdit, onDelete, onUpdateExercise }: WorkoutCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const { session } = useAuth();
+  const [publishing, setPublishing] = useState(false);
+
+  async function handlePublish() {
+    if (!session) return;
+    setPublishing(true);
+    try {
+      await publishWorkout(workout, session.user.id);
+      // feedback de sucesso aqui
+    } finally {
+      setPublishing(false);
+    }
+  }
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow mb-3 overflow-hidden">
@@ -44,6 +59,11 @@ export function WorkoutCard({ workout, totalSeconds, onEdit, onDelete, onUpdateE
           </div>
           <div className="flex items-center gap-2">
             <TypeBadge type={workout.type} />
+            {session && (
+              <button onClick={handlePublish} disabled={publishing} className="text-gray-400 hover:text-green-500 transition-colors">
+                <UploadIcon />
+              </button>
+            )}
             <button
               onClick={onEdit}
               className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
@@ -100,49 +120,26 @@ export function WorkoutCard({ workout, totalSeconds, onEdit, onDelete, onUpdateE
               key={ex.id}
               exercise={ex}
               index={i}
-              onCalibrate={times => onUpdateExercise(ex.id, { calibratedSetTimes: times })}
+              onCalibrate={fields => onUpdateExercise(ex.id, fields)}
             />
           ))}
         </div>
       </div>
-      {/* <div className="border-t border-gray-100 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
-        {workout.exercises.map((ex, i) => (
-          <div key={ex.id} className="px-5 py-3 flex flex-col gap-1">
-            <div className="flex justify-between items-start">
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                {i + 1}. {ex.name}
-              </span>
-              {ex.details && (
-                <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full ml-2 shrink-0">
-                  {ex.details}
-                </span>
-              )}
-            </div>
-            <div className="flex gap-3 flex-wrap">
-              <ExercisePill label="Grupo" value={ex.muscleGroup} />
-              <ExercisePill label="Sets" value={String(ex.sets)} />
-              <ExercisePill
-                label={ex.type === 'tempo' ? 'Tempo' : 'Reps'}
-                value={ex.type === 'tempo' ? formatTime(Number(ex.reps)) : ex.reps}
-              />
-              <ExercisePill label="Descanso" value={formatTime(ex.rest)} />
-              {ex.load && <ExercisePill label="Carga" value={`${ex.load}kg`} />}
-            </div>
-          </div>
-        ))}
-      </div> */}
+
     </div>
   );
 }
 
-// function ExercisePill({ label, value }: { label: string; value: string }) {
-//   return (
-//     <span className="text-xs text-gray-500 dark:text-gray-400">
-//       <span className="text-gray-400 dark:text-gray-600">{label}: </span>
-//       {value}
-//     </span>
-//   );
-// }
+function UploadIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.5 19A5.5 5.5 0 0 0 18 8h-1.26A8 8 0 1 0 3 16.3" />
+      <polyline points="12 10 8 14 16 14" />
+      <line x1="12" y1="22" x2="12" y2="10" />
+    </svg>
+  );
+}
 
 function ChevronIcon({ expanded }: { expanded: boolean }) {
   return (

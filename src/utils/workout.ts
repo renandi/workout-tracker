@@ -12,23 +12,26 @@ export function formatTime(seconds: number): string {
   return rem > 0 ? `${h}h ${rem}min` : `${h}h`;
 }
 
-// Tempo médio calibrado por set, ou null se nunca foi calibrado
 export function getCalibratedAverage(exercise: Exercise): number | null {
   const times = exercise.calibratedSetTimes;
   if (!times || times.length === 0) return null;
   return Math.round(times.reduce((a, b) => a + b, 0) / times.length);
 }
 
-// Estimativa de duração de UM set, em segundos
 function estimateSetDuration(exercise: Exercise): number {
+  // 1. Prioridade: calibração via cronômetro (mais preciso, é medido)
   const calibrated = getCalibratedAverage(exercise);
   if (calibrated !== null) return calibrated;
 
+  // 2. Segunda opção: valor digitado manualmente pelo usuário
+  if (exercise.manualSetSeconds !== undefined && exercise.manualSetSeconds > 0) {
+    return exercise.manualSetSeconds;
+  }
+
+  // 3. Fallback: estimativa automática
   if (exercise.type === 'tempo') {
     return Number(exercise.reps) || 0;
   }
-
-  // Sem calibração e por reps: estimativa genérica de 2.5s por rep
   const repsNumber = parseInt(exercise.reps, 10) || 10;
   return Math.round(repsNumber * 2.5);
 }

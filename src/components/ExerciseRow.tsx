@@ -8,7 +8,7 @@ import { MuscleGroupBadge } from './MuscleGroupBadge';
 interface ExerciseRowProps {
   exercise: Exercise;
   index: number;
-  onCalibrate: (times: number[]) => void;
+  onCalibrate: (fields: Partial<Exercise>) => void;
 }
 
 export function ExerciseRow({ exercise, index, onCalibrate }: ExerciseRowProps) {
@@ -36,20 +36,17 @@ export function ExerciseRow({ exercise, index, onCalibrate }: ExerciseRowProps) 
 
         <button
           onClick={() => setActive(p => !p)}
-          className={`text-xs font-medium transition-colors flex items-center gap-1 shrink-0 ${
-            active
+          className={`text-xs font-medium transition-colors flex items-center gap-1 shrink-0 ${active
               ? 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
               : 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300'
-          }`}
+            }`}
         >
           {active ? 'Fechar' : <><PlayIcon /> Iniciar</>}
         </button>
       </div>
 
-      {/* Cronômetro de calibração — só aparece com o exercício ativo */}
       {active && (
-        <ExerciseCalibration exercise={exercise} onUpdate={onCalibrate} />
-      )}
+        <ExerciseCalibration exercise={exercise} onUpdate={onCalibrate} />)}
     </div>
   );
 }

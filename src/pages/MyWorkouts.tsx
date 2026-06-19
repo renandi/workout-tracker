@@ -6,7 +6,9 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useTheme } from '../hooks/useTheme';
 import { calcTotalTime, importWorkoutsFromJson } from '../utils/workout';
 import type { Exercise, Workout } from '../types/workout';
+import { UserMenu } from '../components/UserMenu';
 import rawWorkouts from '../data/workouts.json';
+
 
 export function MyWorkouts() {
   const { theme, toggleTheme } = useTheme();
@@ -45,6 +47,7 @@ export function MyWorkouts() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Meus treinos</h1>
         <div className="flex items-center gap-2">
+          <UserMenu />
           <button
             onClick={toggleTheme}
             className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"

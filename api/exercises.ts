@@ -1,25 +1,42 @@
+// api/exercises.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { randomUUID } from 'crypto';
+import { createClient } from '@supabase/supabase-js';
 
-const SEED = [
-  { id: randomUUID(), name: 'Supino Reto', type: 'reps', muscleGroup: 'Peito', sets: 4, reps: '6-9', rest: 90, load: null },
-  { id: randomUUID(), name: 'Agachamento Livre', type: 'reps', muscleGroup: 'Perna', sets: 4, reps: '6-9', rest: 120, load: null },
-  { id: randomUUID(), name: 'Barra Fixa', type: 'reps', muscleGroup: 'Costas', sets: 3, reps: 'X', rest: 90, load: null },
-  { id: randomUUID(), name: 'Desenvolvimento Máquina', type: 'reps', muscleGroup: 'Ombro', sets: 4, reps: '6-9', rest: 90, load: null },
-  { id: randomUUID(), name: 'Rosca Direta', type: 'reps', muscleGroup: 'Bíceps', sets: 3, reps: '8-10', rest: 60, load: null },
-  { id: randomUUID(), name: 'Tríceps Corda', type: 'reps', muscleGroup: 'Tríceps', sets: 3, reps: '10-12', rest: 60, load: null },
-  { id: randomUUID(), name: 'Rosca Punho', type: 'reps', muscleGroup: 'Antebraço', sets: 3, reps: '12-15', rest: 45, load: null },
-  { id: randomUUID(), name: 'Elevação Pélvica', type: 'reps', muscleGroup: 'Glúteo', sets: 4, reps: '10-12', rest: 75, load: null },
-  { id: randomUUID(), name: 'Panturrilha em Pé', type: 'reps', muscleGroup: 'Panturrilha', sets: 4, reps: '12-15', rest: 45, load: null },
-  { id: randomUUID(), name: 'Prancha Isométrica', type: 'tempo', muscleGroup: 'Abdômen', sets: 3, reps: '60', rest: 60, load: null },
-  { id: randomUUID(), name: 'Burpee', type: 'tempo', muscleGroup: 'Cardio', sets: 4, reps: '30', rest: 15, load: null },
-  { id: randomUUID(), name: 'Mountain Climber', type: 'tempo', muscleGroup: 'Corpo todo', sets: 4, reps: '30', rest: 15, load: null },
-];
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method === 'GET') return res.status(200).json(SEED);
+
+  if (req.method === 'GET') {
+    const { data, error } = await supabase
+      .from('library_exercises')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    // adapta snake_case do banco pro camelCase que o frontend espera
+    const formatted = data.map(ex => ({
+      id: ex.id,
+      name: ex.name,
+      type: ex.type,
+      muscleGroup: ex.muscle_group,
+      sets: ex.sets,
+      reps: ex.reps,
+      rest: ex.rest,
+      load: ex.load,
+      details: ex.details,
+      author: ex.author_id,
+    }));
+
+    return res.status(200).json(formatted);
+  }
+
   return res.status(405).json({ error: 'Method not allowed' });
 }

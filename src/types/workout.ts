@@ -21,7 +21,8 @@ export interface Exercise {
   rest: number;
   load: number | null;
   details?: string;
-  // Calibração: tempo real medido por set, em segundos
+  // Tempo médio por set, em segundos — pode vir de calibração (cronômetro) OU manual
+  manualSetSeconds?: number;
   calibratedSetTimes?: number[];
 }
 
