@@ -33,7 +33,10 @@ export function useAuth() {
   async function signInWithGoogle() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin },
+      options: { 
+         redirectTo: import.meta.env.VITE_AUTH_REDIRECT_URL, 
+        // redirectTo: window.location.origin 
+      },
     });
   }
 
