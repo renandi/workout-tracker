@@ -19,7 +19,11 @@ async function authedRequest<T>(
     ...options,
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
+
+  // 204 No Content (ou qualquer corpo vazio) não tem JSON pra parsear
+  if (res.status === 204) return undefined as T;
+  const text = await res.text();
+  return text ? JSON.parse(text) : (undefined as T);
 }
 
 export interface CreateWorkoutPayload {
@@ -117,6 +121,27 @@ export const api = {
     authedRequest<{ workoutId: string }>("/own-workouts", {
       method: "PATCH",
       body: JSON.stringify({ workoutId, ...payload }),
+    }),
+
+  reorderUserWorkouts: (order: string[]) =>
+    authedRequest("/user-workouts", {
+      method: "PUT",
+      body: JSON.stringify({ order }),
+    }),
+
+  customizeExercise: (workoutExerciseId: string, fields: Partial<Exercise>) =>
+    authedRequest("/customize-exercise", {
+      method: "POST",
+      body: JSON.stringify({
+        workoutExerciseId,
+        sets: fields.sets,
+        reps: fields.reps,
+        rest: fields.rest,
+        load: fields.load,
+        details: fields.details,
+        manualSetSeconds: fields.manualSetSeconds,
+        calibratedSetTimes: fields.calibratedSetTimes,
+      }),
     }),
 };
 

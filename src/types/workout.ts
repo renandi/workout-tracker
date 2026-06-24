@@ -20,7 +20,7 @@ export interface ExerciseCatalogItem {
 }
 
 export interface Exercise extends ExerciseCatalogItem {
-  // dados específicos da execução nesse treino
+  workoutExerciseId?: string; // referência pra saber o que customizar (só existe quando vem do banco)
   sets: number;
   reps: string;
   rest: number;

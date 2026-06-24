@@ -11,10 +11,22 @@ import rawWorkouts from '../data/workouts.json';
 
 export function MyWorkouts() {
   const { theme, toggleTheme } = useTheme();
-  const { workouts, loading, loggedIn, addWorkout, updateWorkout, removeWorkout, updateExercise } = useUserWorkouts();
+  const { workouts, loading, loggedIn, addWorkout, updateWorkout, removeWorkout, updateExercise, reorderWorkouts } = useUserWorkouts();
+  const [draggedId, setDraggedId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Workout | null>(null);
   const [creating, setCreating] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
+
+  function handleDrop(targetId: string) {
+    if (!draggedId || draggedId === targetId) return;
+    const fromIndex = workouts.findIndex(w => w.id === draggedId);
+    const toIndex = workouts.findIndex(w => w.id === targetId);
+    const reordered = [...workouts];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+    reorderWorkouts(reordered);
+    setDraggedId(null);
+  }
 
   async function handleSave(workout: Workout) {
     if (editing) {
@@ -70,14 +82,22 @@ export function MyWorkouts() {
       )}
 
       {!loading && workouts.map(w => (
-        <WorkoutCard
+        <div
           key={w.id}
-          workout={w}
-          totalSeconds={calcTotalTime(w)}
-          onEdit={() => setEditing(w)}
-          onDelete={() => removeWorkout(w.id)}
-          onUpdateExercise={(exId, fields) => updateExercise(w.id, exId, fields)}
-        />
+          draggable
+          onDragStart={() => setDraggedId(w.id)}
+          onDragOver={e => e.preventDefault()}
+          onDrop={() => handleDrop(w.id)}
+          className={draggedId === w.id ? 'opacity-40' : ''}
+        >
+          <WorkoutCard
+            workout={w}
+            totalSeconds={calcTotalTime(w)}
+            onEdit={() => setEditing(w)}
+            onDelete={() => removeWorkout(w.id)}
+            onUpdateExercise={(exId, fields) => updateExercise(w.id, exId, fields)}
+          />
+        </div>
       ))}
 
       <CreateWorkoutModal

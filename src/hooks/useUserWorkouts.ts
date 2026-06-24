@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "./useAuth";
 import { useLocalStorage } from "./useLocalStorage";
 import { api } from "../services/api";
-import type { Workout } from "../types/workout";
+import type { Exercise, Workout } from "../types/workout";
 import type { UserWorkout } from "../services/api";
 
 export function useUserWorkouts() {
@@ -99,18 +99,78 @@ export function useUserWorkouts() {
   async function updateExercise(
     workoutId: string,
     exerciseId: string,
-    fields: Partial<Workout["exercises"][number]>,
+    fields: Partial<Exercise>,
   ) {
-    const workout = workouts.find((w) => w.id === workoutId);
-    if (!workout) return;
-    const updatedExercises = workout.exercises.map((ex) =>
-      ex.id === exerciseId ? { ...ex, ...fields } : ex,
-    );
-    await updateWorkout(workoutId, {
-      title: workout.title,
-      type: workout.type,
-      exercises: updatedExercises,
-    });
+    if (loggedIn) {
+      const userWorkout = remoteWorkouts.find(
+        (uw) => uw.workout.id === workoutId,
+      );
+      const exercise = userWorkout?.workout.exercises.find(
+        (ex) => ex.id === exerciseId,
+      );
+      if (!exercise?.workoutExerciseId) return;
+
+      // Update otimista: aplica a mudança no estado local imediatamente
+      setRemoteWorkouts((prev) =>
+        prev.map((uw) =>
+          uw.workout.id === workoutId
+            ? {
+                ...uw,
+                workout: {
+                  ...uw.workout,
+                  exercises: uw.workout.exercises.map((ex) =>
+                    ex.id === exerciseId ? { ...ex, ...fields } : ex,
+                  ),
+                },
+              }
+            : uw,
+        ),
+      );
+
+      // Persiste em segundo plano, sem re-buscar tudo
+      try {
+        await api.customizeExercise(exercise.workoutExerciseId, {
+          ...exercise,
+          ...fields,
+        });
+      } catch (err) {
+        // se falhar, desfaz o update otimista recarregando do servidor
+        await reload();
+        throw err;
+      }
+    } else {
+      setLocalWorkouts((prev) =>
+        prev.map((w) =>
+          w.id === workoutId
+            ? {
+                ...w,
+                exercises: w.exercises.map((ex) =>
+                  ex.id === exerciseId ? { ...ex, ...fields } : ex,
+                ),
+              }
+            : w,
+        ),
+      );
+    }
+  }
+
+  async function reorderWorkouts(newOrder: Workout[]) {
+    if (loggedIn) {
+      const orderedIds = newOrder.map((w) => {
+        const uw = remoteWorkouts.find((rw) => rw.workout.id === w.id);
+        return uw!.userWorkoutId;
+      });
+
+      // aplica local imediatamente
+      setRemoteWorkouts((prev) => {
+        const map = new Map(prev.map((uw) => [uw.workout.id, uw]));
+        return newOrder.map((w) => map.get(w.id)!);
+      });
+
+      await api.reorderUserWorkouts(orderedIds);
+    } else {
+      setLocalWorkouts(newOrder);
+    }
   }
 
   return {
@@ -122,6 +182,7 @@ export function useUserWorkouts() {
     removeWorkout,
     addFromLibrary,
     updateExercise,
+    reorderWorkouts, // novo
     reload,
   };
 }
